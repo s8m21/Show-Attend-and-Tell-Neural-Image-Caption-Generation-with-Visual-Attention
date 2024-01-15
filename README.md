@@ -2,7 +2,7 @@
 
 Website: https://expo.baulab.info/2023-Fall/Ayush-Patel-10/
 
-This repository provides two implementations for the paper "Show, Attend and Tell" using both VGG and InceptionV3 models trained on the MS COCO dataset. Below are the instructions to run, train, and evaluate the models.
+This repository provides two implementations for the paper "Show, Attend, and Tell" using both VGG and InceptionV3 models trained on the MS COCO dataset. Below are the instructions to run, train, and evaluate the models.
 
 ## Intructions
 
@@ -13,7 +13,7 @@ This repository provides two implementations for the paper "Show, Attend and Tel
 
 2. **Testing the Model:**
   - Open the LoadingAndTestingModel.ipynb Jupyter Notebook file.
-  - Run the file to check the model's performance on your personal images.
+  - Run the file to check the model's performance on images of your choice.
   - Ensure that the images are in the required format.
 
 3. **Evaluation:**
@@ -33,7 +33,7 @@ If you want to train the models on your dataset:
 2. Open the TrainingAndSavingModel.ipynb file.
 3. Run the file, adjusting hyperparameters as needed.
 
-We have trained the model on 5000 vocab size, 100000 images and captions. 
+We have trained the model on 5000 vocab sizes, 100000 images, and captions. 
 
 ## Evaluation
 
