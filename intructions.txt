@@ -1,0 +1,10 @@
+Here are the 2 implementation for the paper: Show, Attend and Tell
+
+We have trained the both the VGG and InceptionV3 on MS COCO dataset.
+
+To run the code first open the TrainingAndSavingModel ipynb file, run the entire file and make sure the model is saved on your Google Drive.(You can change the hyperparameters according to your system needs.)
+
+Then run the LoadingAndTestingModel ipynb file, you can check the model perform on your personal images.(just make sure the images are in the required format.)
+
+For evaluation, run the cocoEvalCapDemo ipynb file to check the BLUE and METEOR score for the models. (I have customized the coco-caption which you can scrape from my github. I have made some changes accroding to our model's requirements.)
+

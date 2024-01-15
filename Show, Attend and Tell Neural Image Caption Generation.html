@@ -1,0 +1,687 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>Show, Attend and Tell: Neural Image Caption Generation with Visual Attention</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+    margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.highlight-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-gray_background {
+	background: rgba(241, 241, 239, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(244, 240, 247, 0.8);
+}
+.block-color-pink_background {
+	background: rgba(249, 238, 243, 0.8);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: rgba(35, 131, 226, .07); }
+.select-value-color-pink { background-color: rgba(245, 224, 233, 1); }
+.select-value-color-purple { background-color: rgba(232, 222, 238, 1); }
+.select-value-color-green { background-color: rgba(219, 237, 219, 1); }
+.select-value-color-gray { background-color: rgba(227, 226, 224, 1); }
+.select-value-color-translucentGray { background-color: rgba(255, 255, 255, 0.0375); }
+.select-value-color-orange { background-color: rgba(250, 222, 201, 1); }
+.select-value-color-brown { background-color: rgba(238, 224, 218, 1); }
+.select-value-color-red { background-color: rgba(255, 226, 221, 1); }
+.select-value-color-yellow { background-color: rgba(253, 236, 200, 1); }
+.select-value-color-blue { background-color: rgba(211, 229, 239, 1); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="efed1236-3302-4125-8f64-89462917dfc8" class="page sans"><header><h1 class="page-title"><strong><mark class="highlight-default">Show, Attend and Tell: Neural Image Caption Generation </mark></strong><strong><strong>with Visual Attention</strong></strong></h1><p class="page-description"></p></header><div class="page-body"><p id="733728c9-722f-4a88-93ad-aebf022611a9" class="">                                                                                                    <strong>— By: Ayush Patel, Kush Suryavanshi, Spandan Maaheshwari</strong></p><h1 id="d2168fb9-c156-4a4e-b3c5-3e56c73df465" class="block-color-default"><strong>Analysis</strong></h1><p id="448f0eb3-73e9-4f77-bbaf-e41b6c6ad03d" class="">The &quot;Show, Attend and Tell&quot; paper marks a pivotal advancement in image captioning by effectively integrating convolutional neural networks and recurrent neural networks with the novel introduction of attention mechanisms. This model surpasses traditional CNN-RNN approaches by allowing dynamic focus on different parts of an image during caption generation. The attention mechanism enables the network to produce more contextually relevant and accurate captions by mimicking human visual attention, which selectively focuses on various aspects of a scene for comprehension and description.</p><p id="3b670acb-3aa8-4ef9-8219-c1e22f83fd20" class="">The empirical evidence presented in the paper highlights the model&#x27;s superior performance in generating descriptive captions for images, demonstrating a more profound understanding of both visual elements and linguistic requirements. This is a significant leap in merging computer vision and natural language processing, showcasing the effectiveness of attention mechanisms in enhancing the quality and relevance of image captioning systems.</p><p id="db9dda89-5462-4c3c-8bb4-56366e63a178" class="">However, there are several areas where the model could be further improved. Enhancing the granularity of the attention mechanism could lead to more detailed captions, especially for complex scenes with multiple objects. Extending the model to handle video data through temporal attention, adapting it for different domains like medical imaging or satellite imagery, and enhancing multilingual and cultural adaptability are some areas that promise further advancements.</p><p id="825be0d2-77f6-4920-9842-8bfd539102ac" class="">Finally, addressing interpretability and potential biases in the model&#x27;s attention and captioning process is crucial for ethical AI development. Integrating this model with other natural language processing tasks such as question-answering or interactive storytelling could open new avenues for applications. These improvements and expansions could lead to more robust, versatile, and globally applicable systems in computer vision and natural language processing.</p><h1 id="b9c4ddf6-1a26-4b54-9365-99cf749f58b7" class="">Literature Review</h1><p id="d68b0804-669b-441f-8104-4e2974b938aa" class=""><strong>1. Foundation in Machine Translation ([Cho et.al., 2014];</strong> <strong>[Bahdanau et al., 2014];</strong> <strong>[Sutskever et al., 2014]):</strong></p><p id="e024acff-3f6c-4120-8a45-4cfe28891f98" class="">In the realm of machine translation, researchers discovered that the interplay between convolutional neural networks (CNNs) and recurrent neural networks (RNNs) could be harnessed for the complex task of image captioning. These early explorations revealed that CNNs could adeptly extract nuanced visual features from images, which RNNs could then adeptly weave into coherent narratives. This foundational work set the stage for deep learning models to bridge the gap between visual perception and linguistic expression.</p><p id="ee704130-90b2-4f81-947d-a47384f5dabb" class=""><strong>2. Early Neural Network Approaches:</strong></p><p id="c626dc11-3638-4094-9547-5de58a3e5f87" class="">Pioneering approaches, such as those by Kiros et al. (2014a) and Kiros et al. (2014b), introduced multimodal learning frameworks that integrated log-bilinear models influenced by image features, enhancing the correlation between visual data and language. Mao et al. (2014) further refined this approach by replacing traditional feed-forward language models with recurrent structures, thus improving the continuity and contextual relevance of generated captions. Vinyals et al. (2014) and Donahue et al. (2014) innovated by incorporating Long Short-Term Memory (LSTM) networks, with the novel approach of exposing the image to the LSTM only once at the start of the generation process, promoting a more focused and efficient captioning process.</p><p id="5388ae8c-32a1-4c9a-9972-fbbf59d2ce99" class=""><strong>3. Joint Embedding Space</strong> <strong>[Karpathy &amp; Li 2014]:</strong></p><p id="498c0bf7-968c-42a1-a5de-be19234d336e" class="">The conceptualization of joint embedding space was a leap forward, allowing for a more integrated and symbiotic relationship between image and text. This space emerged as a pivotal learning environment for evaluating the complex interplay between visual inputs and their corresponding linguistic descriptions, carefully measuring how closely image content aligns with the text used to describe it. By leveraging object detection and sophisticated language processing, the models could discern and articulate the semantic synergy between seen images and spoken words with greater precision.</p><p id="1b683d8d-6dc7-4373-9749-c102d35367e7" class=""><strong>4. Object Detection-Based Approaches</strong> <strong>[Fang et al. (2014)]:</strong></p><p id="7edd3914-f2b8-4c3d-a6d5-62a1846e90f3" class="">The integration of object detection methodologies into the caption generation pipeline marked a significant advancement, introducing a level of specificity and relevance previously unattained. This approach allowed for a precise identification of visual elements within images, providing a solid foundation upon which descriptive captions could be constructed. This method underscored the significance of granular visual understanding in the accurate and rich depiction of images through text.</p><p id="e8afdf8e-7817-4a65-8ad8-4af675f1a750" class=""><strong><strong>5. Attention in Neural Networks [Tang et al., 2014)]:</strong></strong></p><p id="b7d45893-df76-4fbf-b62a-7973b8c8ebdd" class="">The introduction of attention mechanisms by Larochelle &amp; Hinton, Denil et al., and Tang et al. represented a monumental shift towards more dynamic and context-aware neural networks. Bahdanau et al.’s integration of attention into neural machine translation, followed by Ba et al.&#x27;s work on multiple object recognition with visual attention, provided the critical stepping stones for incorporating attention mechanisms into image captioning, culminating in the enhanced ability of models to selectively concentrate on salient features of an image to generate relevant and accurate captions.</p><h1 id="8548eebc-8576-4c84-83d2-b857a51d0bb2" class="">Biography</h1><figure id="21af0a83-79f6-4f1d-a9cf-6cf9d9440900" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled.png"/></a></figure><h2 id="502c3700-3182-42ed-bb6a-4ccc8e5131b8" class="">1. <strong>Kelvin Xu: AI Researcher at Google Deepmind</strong></h2><p id="9da3d9d2-a9ed-4991-b699-8ebc8210c29e" class="">Kelvin Xu is a leading figure in artificial intelligence, renowned for his work on practical AI systems. An alumnus of the University of California, Berkeley, and the MILA lab at Université de Montréal, he has studied under AI pioneers like Prof. Yoshua Bengio. With a foundation in deep learning, image captioning, and reinforcement learning from his tenure at Google&#x27;s Brain Residency Program and the University of Toronto, Kelvin&#x27;s expertise is pushing the boundaries of AI technology.</p><p id="73113597-a868-45e4-89b6-4c79cca3436c" class="">
+</p><figure id="51a0728a-482d-4345-a00c-dd5fe66095e9" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%201.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%201.png"/></a></figure><h2 id="61e6e421-3479-4ea8-ac01-4b99d8c1256a" class="">2. <strong>Jimmy L. Ba: AI Innovator and Educator</strong></h2><p id="ac15dd0d-d94d-4297-97bf-c35ed827522a" class="">Serving as an Assistant Professor at the University of Toronto, Jimmy L. Ba is renowned for his significant contributions to AI, including co-developing the Adam Optimizer. His academic journey, mentored by AI luminaries like Geoffrey Hinton, spans from an undergraduate to a Ph.D. at the University of Toronto. Holding the Canada CIFAR AI Chair at the Vector Institute, his research delves into reinforcement learning and statistical learning theory. Honored with the Facebook Graduate Fellowship, Jimmy&#x27;s notable achievement includes leading his team to victory at the CVPR 2015 caption generation competition. His work epitomizes the quest for creating AI that mirrors human ingenuity and adaptability.</p><p id="7ea045d4-dac9-40dd-a9bc-988013f14fce" class="">
+</p><figure id="91da0e5e-67bc-44b1-a409-f7788d6ecbfa" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%202.png"><img style="width:240px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%202.png"/></a></figure><h2 id="8b47599e-f5f0-42ad-b06a-10a686857e58" class="">3. <strong>Jamie Ryan Kiros: Eminent Machine Learning Researcher</strong></h2><p id="5cc251fb-11cf-4f47-b9a5-d3f9bd5261a3" class="">Jamie Ryan Krios, a distinguished researcher who recently earned a Ph.D. from the Machine Learning Group at the Department of Computer Science, University of Toronto has established herself with seminal work like &quot;Layer Normalization&quot;. Mentored by leading figures such as Dr. Ruslan Salakhutdinov and Dr. Richard Zemel, her research has garnered acclaim, reflected in the significant scholarly citations it has attracted. Jamie&#x27;s dedication to advancing machine learning techniques and her collaboration with pioneers like Jimmy L. Ba and Geoffrey Hinton highlights her role as a key contributor to the field. Her trajectory promises continued innovation and influence in machine learning.</p><p id="622da013-5072-48a2-80ff-5952ef04671a" class="">
+</p><figure id="792e9187-d7ad-4daf-8d52-ddcfb83c27a2" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%203.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%203.png"/></a></figure><h2 id="fa0eb57a-09cf-46f9-a3d3-c58d5eb6627d" class="">4. <strong>Kyunghyun Cho: AI Pioneer in Communication and Translation</strong></h2><p id="2c87ca2b-88d8-4971-bdbd-bf747893fcdf" class="">Kyunghyun Cho, currently an Associate Professor of Computer Science and Data Science at NYU&#x27;s Courant Institute of Mathematical Sciences, is a leading researcher in the field of artificial intelligence with a passion for building intelligent machines that actively engage in communication, knowledge-seeking, and knowledge creation. His groundbreaking work on attention mechanisms has advanced the field of neural machine translation, impacting both academia and industry. With accolades like the Google Research Award and influential publications, Cho is shaping the future of AI, fostering intelligent communication between machines for complex problem-solving.</p><p id="d7f6d843-1ae4-4a2e-94f8-1db6da5437ed" class="">
+</p><figure id="fd441e0b-ae45-4ece-a6d8-25470024c7c6" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%204.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%204.png"/></a></figure><h2 id="3afa16be-56c4-45bb-928c-e829d6dc221b" class="">5. <strong>Aaron Courville: Innovator in Machine Learning and AI</strong></h2><p id="5e9124a0-a0d2-40eb-b776-e7d39eb55f9a" class="">Dr. Aaron Courville, holding the Canada CIFAR AI Chair at Mila and a faculty position at Université de Montréal, is renowned for his expertise in deep learning and probabilistic models. His educational journey, rooted in Electrical Engineering from the University of Toronto and enriched by a PhD from Carnegie Mellon University, has led to his recognition as a leading expert in AI. His research ambitiously traverses computer vision, natural language processing, and audio signal comprehension. Collaborative efforts with luminaries like Yoshua Bengio and landmark papers such as &quot;Show, Attend and Tell&quot; highlight his influential role in shaping the field. Dr. Courville&#x27;s commitment to innovation is further evidenced by his participation in winning teams for prestigious AI challenges, underscoring his significant impact on global AI advancements.</p><p id="2867aaf5-e18a-4471-9309-8f1b208edc46" class="">
+</p><figure id="40d5be79-31e9-4c96-8975-31a3a25fd9b6" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%205.png"><img style="width:240px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%205.png"/></a></figure><h2 id="feeb0332-f7ce-49e9-8af6-644aab4dc0b1" class="">6. <strong>Ruslan Salakhutdinov: Architect of Modern Machine Learning</strong></h2><p id="c8d288c4-e078-4a82-8d65-9b836956c0b3" class="">Dr. Ruslan Salakhutdinov, a leading voice in machine learning, has made significant strides in deep learning and optimization since earning his Ph.D. from the University of Toronto. His postdoctoral tenure at MIT&#x27;s AI Lab paved the way for his influential role at Carnegie Mellon University. A recipient of numerous prestigious accolades such as the Alfred P. Sloan Research Fellowship and awards from Google and Nvidia, Ruslan&#x27;s work delves into the complexities of vast datasets. His editorial contributions to the Journal of Machine Learning Research and service on program committees for conferences like NIPS and ICML speak to his dedication to the field. At the Canadian Institute for Advanced Research, he continues to be instrumental in evolving the landscape of machine learning, pushing the frontiers of AI towards new realms of possibility.</p><p id="6558a69c-cb2d-4a2d-97cf-67e50d888183" class="">
+</p><figure id="ae82a064-4e9c-4312-8bbe-06a3afde999a" class="image"><a href="https://www.cs.columbia.edu/~zemel/zemelHead.jpg"><img style="width:240px" src="https://www.cs.columbia.edu/~zemel/zemelHead.jpg"/></a></figure><h2 id="5b3e9aee-b3b1-4109-823e-ff396e940405" class="">7. <strong>Richard S. Zemel: Luminary in Computer Science and AI Innovation</strong></h2><p id="2309c84e-1245-4fdd-afef-fd796395743a" class="">Professor Richard S. Zemel, renowned for his extensive work in computer science, holds a prestigious position at the University of Toronto. His diverse academic background includes a B.Sc. from Harvard and a Ph.D. under Geoffrey Hinton. Zemel&#x27;s research has been pivotal in areas like unsupervised learning and machine learning for cognitive tasks. Not only an academic but also an entrepreneur, he co-founded SmartFinance. With honors like the NVIDIA Pioneers of AI Award, his influence extends to his leadership roles within the machine learning community, including on the Neural Information Processing Society&#x27;s Executive Board.</p><p id="47314d91-a860-47e8-96f7-5700c9804b0c" class="">
+</p><figure id="b6ed62e0-8496-4a6b-9aec-c6b6b9507353" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%206.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%206.png"/></a></figure><h2 id="1e0eae56-2464-4e70-8298-c62789bdca0d" class="">8. <strong>Yoshua Bengio: Turing Award Laureate</strong></h2><p id="8e36ccb4-7ece-47f9-b374-ff6ddc8c02c0" class="">Professor Yoshua Bengio, a Full Professor at Université de Montréal, is a vanguard in artificial intelligence, recognized globally for his profound contributions, particularly in deep learning. As Founder and Scientific Director of Mila and IVADO, his work has earned him the esteemed 2018 A.M. Turing Award, an accolade often equated with the Nobel Prize in computing. His accolades include fellowships with the Royal Societies of London and Canada, the Legion of Honor, and a CIFAR AI Chair. A guiding force in AI policy, Dr. Bengio also serves on the UN&#x27;s Scientific Advisory Board, further cementing his role as a visionary in AI&#x27;s evolution.</p><h1 id="3ae0c88b-0307-47d4-8471-70d608540301" class="">Model Architecture</h1><figure id="7da4c8b1-ee86-4b64-a278-7a2efd394820" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%207.png"><img style="width:720px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%207.png"/></a><figcaption><mark class="highlight-default">Approach Overview: In step (2), image features are captured at lower convolutional layers. In step (3), a feature is sampled, and fed to LSTM to generate the corresponding word. Step 3 is repeated K times to generate K-words caption.</mark></figcaption></figure><h2 id="3735fe71-870a-4e1d-b210-f6cb6a00930a" class="">CNN Encoder</h2><ul id="0812c793-1186-4182-9cd3-e47c14037020" class="bulleted-list"><li style="list-style-type:disc">The model takes a single raw image and generates a caption <em>y</em> encoded as a sequence of 1-of-<em>K</em> encoded words, where <em>K</em> is the size of the vocabulary and <em>C</em> is the length of the caption.</li></ul><figure id="f4859677-fcbb-44b7-b93f-f14ec4b1cb1d" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img1.png"><img style="width:336px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img1.png"/></a></figure><ul id="39bba896-3d3c-42e7-919d-d14902bb49cc" class="bulleted-list"><li style="list-style-type:disc">A convolutional neural network (CNN) is used to extract a set of feature vectors which we refer to as annotation vectors.</li></ul><ul id="09d5f210-6833-4270-9421-6b943faf334e" class="bulleted-list"><li style="list-style-type:disc">The extractor produces <em>L</em> vectors, each of which is a <em>D-</em>dimensional representation corresponding to a part of the image.</li></ul><figure id="68ad3ceb-4224-45c3-93fb-ef28928baf89" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img2.png"><img style="width:336px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img2.png"/></a></figure><p id="fbc2e37f-8806-434b-9cea-e9ba7c9448a3" class="">Features are extracted from a lower convolutional layer. This allows the decoder to selectively focus on certain parts of an image by weighting a subset of all the feature vectors.</p><ul id="d57aa317-25ed-408d-983d-2cc7e388f1e5" class="bulleted-list"><li style="list-style-type:disc">e.g.: the 14×14×512 feature map of the fourth convolutional layer before max pooling in ImageNet-Pretrained VGGNet is used.</li></ul><ul id="7b3740fa-65eb-4386-bc52-9ba34d28b984" class="bulleted-list"><li style="list-style-type:disc">The decoder operates on the flattened 196×512 (i.e. <em>L</em>×<em>D</em>) encoding.</li></ul><h2 id="31a19082-eff5-422d-b346-625dcf5738c1" class="">Attention Decoder</h2><h3 id="ee45e287-0fe3-41e8-9b62-ef486bf2d438" class=""><strong>2.1. Attention Decoder</strong></h3><figure id="6c7e978a-7426-4ef1-90f3-22795e68ef1a" class="image"><a href="https://miro.medium.com/v2/resize:fit:499/0*e4MVGNxKL1irl5Xp.png"><img style="width:576px" src="https://miro.medium.com/v2/resize:fit:499/0*e4MVGNxKL1irl5Xp.png"/></a><figcaption>                                        Left: CNN Encoder, Right: Attention Decoder</figcaption></figure><ul id="a2f7c7fe-3284-4ccb-b4dc-9906f26b6712" class="bulleted-list"><li style="list-style-type:disc">A long short-term memory (LSTM) network is used that produces a caption by generating one word at every time step conditioned on a context vector, the previous hidden state and the previously generated words.</li></ul><ul id="6a090170-2e75-43c0-8c3e-35f68849425a" class="bulleted-list"><li style="list-style-type:disc">The context vector <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">z_{t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em> is a dynamic representation of the relevant part of the image input at time <em>t</em>.</li></ul><ul id="1690ab83-19e4-4e0a-9f80-0c6ff02be806" class="bulleted-list"><li style="list-style-type:disc">A mechanism that computes <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">z_{t}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em> from the annotation vectors <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">a_{i}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em>, <em>i</em>=1, …, <em>L</em> corresponding to the features extracted at different image locations.</li></ul><p id="ab2cfcd4-7a1c-44ce-bc96-ab9854d05a1e" class="">For each location <em>i</em>, the mechanism generates a positive weight <em>i</em> which can be interpreted either as the probability that location <em>i</em> is the right place to focus for producing the next word (stochastic attention mechanism), or as the relative importance to give to location <em>i</em> in blending the <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">a_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em><em>’s</em> together (deterministic attention mechanism).</p><ul id="f18da923-197a-4f15-ba19-c88d17dadfe7" class="bulleted-list"><li style="list-style-type:disc">The weight <em>i</em> of each annotation vector <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">a_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em> is computed by an attention model <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mrow><mi>a</mi><mi>t</mi><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">f_{att}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.1076em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">a</span><span class="mord mathnormal mtight">tt</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em> for which a multilayer perceptron is used which is conditioned on the previous hidden state <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">h_{t-1}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9028em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal">h</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em>.</li></ul><ul id="ff086ef4-0267-40c7-9c28-2b402d5c97bc" class="bulleted-list"><li style="list-style-type:disc">To emphasize, the hidden state varies as the output RNN advances in its output sequence: “where” the network looks next depends on the sequence of words that have already been generated.</li></ul><figure id="dea6795f-7902-4ca8-a864-d6217c8e1361" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img3.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img3.png"/></a></figure><ul id="934b014a-1e97-42f5-a767-5030a17b0d5f" class="bulleted-list"><li style="list-style-type:disc">Once the weights (which sum to one) are computed, i.e. softmax, the context vector <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><msub><mi>z</mi><mi>t</mi></msub><mo>^</mo></mover></mrow><annotation encoding="application/x-tex">\hat{z_{t}}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord accent"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.6944em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.04398em;">z</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.044em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.25em;"><span class="mord">^</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em><em> </em> is computed by:</li></ul><figure id="c7d8d731-ad2a-4265-a811-b14d9ddbb979" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img4.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img4.png"/></a></figure><ul id="39a867e5-480a-41e0-8725-4633d1540110" class="bulleted-list"><li style="list-style-type:disc">Here, <em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ϕ</mi></mrow><annotation encoding="application/x-tex">\phi</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">ϕ</span></span></span></span></span><span>﻿</span></span></em><em> </em> is a function that returns a single vector given the set of annotation vectors and their corresponding weights. This function is mentioned in the next sub-section.</li></ul><figure id="7cb1e30e-c763-4987-9b39-c71572d5071e" class="image"><a href="https://miro.medium.com/v2/resize:fit:630/1*Wek-mREwzt_yYH8rYqOXOw.png"><img style="width:432px" src="https://miro.medium.com/v2/resize:fit:630/1*Wek-mREwzt_yYH8rYqOXOw.png"/></a><figcaption>    <strong>Relationships between annotation vectors </strong><em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">a_{i}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5806em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em><em><strong> </strong></em><strong>and weights </strong><em><style>@import url('https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css')</style><span data-token-index="0" contenteditable="false" class="notion-text-equation-token" style="user-select:all;-webkit-user-select:all;-moz-user-select:all"><span></span><span><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>α</mi><mrow><mi>i</mi><mo separator="true">,</mo><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">\alpha_{i,t} </annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7167em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.0037em;">α</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0037em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mpunct mtight">,</span><span class="mord mathnormal mtight">t</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span><span>﻿</span></span></em></figcaption></figure><h3 id="1f447f88-f64c-48a5-b645-0fc0e2df9cf9" class=""><strong>2.2. Stochastic “Hard” Attention &amp; Deterministic “Soft” Attention</strong></h3><figure id="99b2f2e2-6273-4a9e-b0fe-b6087f015a8c" class="image"><a href="https://miro.medium.com/v2/resize:fit:630/1*-i9T-x7OZ0J0Wt-k0wkCyA.png"><img style="width:480px" src="https://miro.medium.com/v2/resize:fit:630/1*-i9T-x7OZ0J0Wt-k0wkCyA.png"/></a><figcaption>                                        Soft and Hard Attention</figcaption></figure><ul id="2ddf32e5-6074-4ebf-96ef-80a8493768ee" class="bulleted-list"><li style="list-style-type:disc">The hard attention focuses only on the part it wants and ignores other parts while the soft attention is smooth.</li></ul><figure id="5b62ee95-8f7b-434b-8e2a-5e72e41f66e3" class="image" style="text-align:center"><a href="https://miro.medium.com/v2/resize:fit:900/1*lyjstbpXBEtp_5DqVJ5Huw.png"><img style="width:720px" src="https://miro.medium.com/v2/resize:fit:900/1*lyjstbpXBEtp_5DqVJ5Huw.png"/></a><figcaption>                                                                                     Soft Attention</figcaption></figure><ul id="c921d0b8-e426-43a3-8ae4-e0ae23850f70" class="bulleted-list"><li style="list-style-type:disc">In soft attention, different weights based on the image are used.</li></ul><figure id="a9ec9446-1a68-47e8-a73f-18d72208e9f1" class="image"><a href="https://miro.medium.com/v2/resize:fit:630/1*brNvs231Fp7oPoqZrCSwjQ.png"><img style="width:720px" src="https://miro.medium.com/v2/resize:fit:630/1*brNvs231Fp7oPoqZrCSwjQ.png"/></a><figcaption>                                                                                   Hard Attention </figcaption></figure><ul id="0d73808e-a879-4da5-ac50-324f8bd51931" class="bulleted-list"><li style="list-style-type:disc">In hard attention, only the most important part is used.</li></ul><figure id="da5b68d7-69fe-4900-bef7-044373e3f2c6" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%208.png"><img style="width:768px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%208.png"/></a><figcaption>                                                                 Examples of soft (top) and hard (bottom) attentions</figcaption></figure><h1 id="71857144-ac92-48c5-9444-d1531ee72a80" class="">Experimental Results</h1><figure id="441001ce-a051-4bc1-be2b-5db8706f27a6" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img5.png"><img style="width:768px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img5.png"/></a><figcaption>                                                        BLUE and METEOR score metrics compared to other methods</figcaption></figure><ul id="71abb616-df68-4461-b691-41a9f1460280" class="bulleted-list"><li style="list-style-type:disc">Each image in the Flickr8k/30k dataset has 5 reference captions.</li></ul><ul id="ce9552b4-8ebc-42db-b5e2-e05317d11e53" class="bulleted-list"><li style="list-style-type:disc">For the MS COCO dataset, captions in excess of 5 are discarded.</li></ul><ul id="e0935d85-fecc-4153-831c-35e395f1b621" class="bulleted-list"><li style="list-style-type:disc">A fixed vocabulary size of 10,000 is used.</li></ul><p id="13402b12-6de9-4178-9003-eee0a0a991ea" class="">Show, Attend &amp; Tell obtains the SOTA performance on the Flickr8k, Flickr30k and MS COCO, e.g. outperforms Show and Tell/NIC.</p><figure id="e2c19fc4-779a-4168-a852-d1054e670acd" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img6.png"><img style="width:624px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img6.png"/></a><figcaption>                           Examples of attention mechanism pointing to the correct object</figcaption></figure><ul id="a1654c63-ee6c-4175-b535-f5268afdd180" class="bulleted-list"><li style="list-style-type:disc">The model learns alignments that agree very strongly with human intuition.</li></ul><figure id="c4510f9e-2b1d-4c67-9212-a7c6c24af4cc" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img7.png"><img style="width:624px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/img7.png"/></a><figcaption>    Examples of mistakes where we can use attention to gain intuition into what the model saw</figcaption></figure><ul id="76b12c30-5890-45d6-891e-38b93bf495a0" class="bulleted-list"><li style="list-style-type:disc">However, the proposed model also makes mistakes, which means there is room for improvement.</li></ul><h1 id="0c9cc511-ada0-4010-9710-f40a4be54086" class="">Implementation Results</h1><p id="14d1837d-70cf-420e-84fe-79745abd0f04" class="">Below are the implementation results performed by our model which uses Bahdanau’s Soft attention mechanism on the MS COCO dataset. The images along with the caption on the left are of Inception V3 and those on the right are of VGG-19. A fixed vocabulary size of 5,000 is used. We have trained the model using 30,000 images and captions and tested on 10,000 images and captions.</p><h3 id="ff69d55b-aa2b-4d2d-b1e8-5a89e43a9398" class="">                                                                                      Original Image                               </h3><figure id="b01e2c05-e4bc-4caa-bbba-ff6eab80c819" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%209.png"><img style="width:240px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%209.png"/></a></figure><div id="93055d73-d53c-4f0b-b2e7-110d961dd17e" class="column-list"><div id="9b10044d-2091-4c83-9469-84c8c29e4a56" style="width:50%" class="column"><figure id="8786b0ad-a44d-42d8-91cc-3c44fcc59c7f" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2010.png"><img style="width:752px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2010.png"/></a></figure></div><div id="39142ffa-b7f9-4760-8b17-bdffb6b00e07" style="width:50%" class="column"><figure id="5bf322d5-5b04-4686-8742-9dd60f5b5ed2" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2011.png"><img style="width:432px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2011.png"/></a></figure></div></div><h3 id="86d000b1-4b87-416b-9268-3cb7e38b8363" class="">                                                                                       Original Image</h3><figure id="28c87d9f-fe8c-4887-b955-18301851dfd7" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2012.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2012.png"/></a></figure><div id="0a348a4c-fdc0-4e82-9753-87229c3eab6e" class="column-list"><div id="1bfc3aef-b575-4585-9b29-50c3a7fb421f" style="width:50%" class="column"><figure id="53b2c4a4-9693-4459-a4fb-72c791e91fb7" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2013.png"><img style="width:480px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2013.png"/></a></figure></div><div id="05d9e8ff-f745-4077-b4e7-e597f940981d" style="width:50%" class="column"><p id="3e3d0f81-bd11-4639-a31c-33701cad9acb" class="">
+</p><p id="85772373-4ffa-45c9-b3ba-d2fb9cfe5bc8" class="">
+</p><figure id="8c9ea092-a37f-446c-aec7-dc0abf673b94" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2014.png"><img style="width:576px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2014.png"/></a></figure></div></div><h3 id="1070de5f-e7e5-4a33-9a50-a1f8f25b3681" class="">                                                                                      Original Image</h3><figure id="afb98f8e-d3b8-49f7-9f7a-39d5659750a9" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2015.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2015.png"/></a></figure><div id="23996f4c-cd49-4cb8-82fd-4cb226fe3132" class="column-list"><div id="11d34eb6-c144-4c94-a516-90f463295759" style="width:50%" class="column"><figure id="5aad41db-c99a-4307-bc80-3b06df7f33bc" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2016.png"><img style="width:853px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2016.png"/></a></figure></div><div id="8d9b4f8e-f94d-412b-bffc-cb2b3b4de067" style="width:50%" class="column"><figure id="927a4405-17a0-4930-a9f9-76037d4cfe53" class="image" style="text-align:center"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2017.png"><img style="width:634px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2017.png"/></a></figure></div></div><h3 id="1fc47dfd-102c-4df7-9590-c4e7dcee58c4" class="">                                                                                       Original Image</h3><figure id="64e3bd5b-b912-4a78-a809-341ed971c452" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2018.png"><img style="width:288px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2018.png"/></a></figure><div id="ebd6804d-151d-4036-8f92-8ddad967d98b" class="column-list"><div id="f185eb7b-3276-4cac-a654-750b012c3a0a" style="width:50%" class="column"><figure id="b7c86db1-06b5-4f65-911d-8afc44db54b2" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2019.png"><img style="width:528px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2019.png"/></a></figure></div><div id="fe604dbe-ff56-4b99-9bae-50447efc9d51" style="width:50%" class="column"><figure id="bd654301-3690-469b-a9db-d95b7fce9b53" class="image"><a href="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2020.png"><img style="width:1442px" src="Show,%20Attend%20and%20Tell%20Neural%20Image%20Caption%20Generat%20efed1236330241258f6489462917dfc8/Untitled%2020.png"/></a></figure></div></div><p id="aac94ac3-baec-47e1-84a7-af96c8bc6e42" class="">
+</p><table id="a4b98a37-d1b0-44a3-b18e-c9c5f7e31a00" class="simple-table"><thead class="simple-table-header"><tr id="007fa9b6-b224-417e-90cf-b686535838a4"><th id="?Zo]" class="simple-table-header-color simple-table-header" style="width:180.66666666666666px"></th><th id="o&gt;\]" class="simple-table-header-color simple-table-header" style="width:180.66666666666666px">BLUE-1</th><th id="eGPp" class="simple-table-header-color simple-table-header" style="width:180.66666666666666px">BLUE-2</th><th id="~m;P" class="simple-table-header-color simple-table-header" style="width:180.66666666666666px">BLUE-3</th><th id="dmTJ" class="simple-table-header-color simple-table-header" style="width:180.66666666666666px">BLUE-4</th><th id="VAX|" class="simple-table-header-color simple-table-header" style="width:180.66666666666666px">METEOR</th></tr></thead><tbody><tr id="d303577d-7e28-4a17-8c3f-deac4eedb59b"><td id="?Zo]" class="" style="width:180.66666666666666px">Paper</td><td id="o&gt;\]" class="" style="width:180.66666666666666px">70.7</td><td id="eGPp" class="" style="width:180.66666666666666px">49.2</td><td id="~m;P" class="" style="width:180.66666666666666px">34.4</td><td id="dmTJ" class="" style="width:180.66666666666666px">24.3</td><td id="VAX|" class="" style="width:180.66666666666666px">23.9</td></tr><tr id="9fc72092-2e17-40da-a7cd-330513f0f551"><td id="?Zo]" class="" style="width:180.66666666666666px">Inception V3</td><td id="o&gt;\]" class="" style="width:180.66666666666666px">36.00</td><td id="eGPp" class="" style="width:180.66666666666666px">12.42</td><td id="~m;P" class="" style="width:180.66666666666666px">6.20</td><td id="dmTJ" class="" style="width:180.66666666666666px">3.17</td><td id="VAX|" class="" style="width:180.66666666666666px">10.04</td></tr></tbody></table><p id="bf7c8676-05e0-4c63-8489-9c369094c9f3" class="">                                             Results from our implementation vs the results from the best model implemented by the author</p><h3 id="8fcf6e34-a904-4aef-b99a-ae62ce4cf4f4" class="">Social Impact</h3><p id="3bb78e7b-4c87-4c63-bd63-02d34d2db592" class="">The advancements presented in the paper bear a significant potential to transform various sectors of society. The introduction of an attention-based model enhances the precision and relevance of image captions, which is a substantial boon for assistive technologies. Such a system could revolutionize the way people with visual impairments interact with digital content, offering them a newfound level of independence in navigating online spaces and understanding visual media.</p><p id="eb35a6aa-accf-440c-9e7c-c0dddb07c08c" class="">In the educational domain, the application of sophisticated image captioning can facilitate more immersive learning experiences, especially for visual learners and students who rely on augmented communication aids. It also has the potential to augment cultural experiences, such as providing dynamic descriptions of artworks or historical artifacts in museums, thus bridging the gap between visual content and its historical or cultural context.</p><p id="4af8a201-d677-4719-9ef0-59f3d12a502b" class="">On the industrial front, the attention-based model can be pivotal in enhancing the efficiency of visual quality control systems in manufacturing, where the ability to accurately describe anomalies could lead to significant improvements in product quality. In the realm of media, such technology could automate the generation of alt-text for images, streamlining content creation and making it more inclusive.</p><p id="ac67d0cb-a6e9-4909-91dd-fea1fd28fb1e" class="">However, as we leverage these models, there is a risk of encoding and perpetuating existing societal biases. The model’s interpretative capabilities are as good as the data it is fed. Hence, if the underlying datasets are skewed or discriminatory, the captions generated could inadvertently perpetuate stereotypes or misrepresentations. Furthermore, in the context of surveillance, the technology could be utilized in ways that infringe upon personal privacy and civil liberties if safeguards are not put in place.</p><p id="4bbdbfb9-cfdc-4d73-8360-b122d108b6df" class="">The ethical deployment of these models necessitates rigorous scrutiny of training datasets and transparent disclosure of the technology&#x27;s use cases. Policymakers and technologists must work in tandem to establish guidelines that safeguard privacy while promoting the beneficial uses of image captioning technologies, ensuring that their societal impact is aligned with principles of equity and justice.</p><h2 id="dcab6644-ffe5-4a3f-9a58-2f7809d1e09b" class="">Industry Applications</h2><p id="984c7828-3474-4bce-b971-f42c5cf38e8e" class="">The paper presents a method that holds promising practical applications. It has applications in areas where data is multi-modal such as e-commerce, where data contains text in the form of metadata as well as images, or in healthcare, where data could contain MRIs or CT scans along with doctor’s notes and diagnoses, to name a few use cases.</p><ul id="8dcd9f84-69a8-4a21-bdb4-1331c3b4d8e0" class="bulleted-list"><li style="list-style-type:disc"><strong>E-commerce </strong>– E-commerce in particular stores vast amounts of data as product images along with textual descriptions. The textual description or metadata is important to ensure that the best products are displayed to the user based on the search queries. Moreover, with the trend of e-commerce sites obtaining data from 3P vendors, the product descriptions are often incomplete, amounting to numerous manual hours and huge overhead resulting from tagging the right information in the metadata columns. Generative-AI-based image captioning is particularly useful for automating this laborious process. Fine-tuning the model on custom fashion data such as fashion images along with text describing the attributes of fashion products can be used to generate metadata that then improves a user’s search experience.</li></ul><ul id="43fdd1eb-d23b-42c4-a57e-bab7f4dec28e" class="bulleted-list"><li style="list-style-type:disc"><strong>Media and Publishing</strong>: Image captioning can be used in media and publishing industries to automatically generate captions for images in news articles, blogs, or social media posts. This helps provide context and enhances the engagement of readers by providing relevant information about the visual content.</li></ul><ul id="0f7d0db4-fa8b-4503-b1c2-3a0b2da54abc" class="bulleted-list"><li style="list-style-type:disc"><strong>Healthcare</strong>: Image captioning can assist medical professionals in the analysis and interpretation of medical images, such as X-rays, MRI scans, or histopathology slides. Automatically generated captions can provide additional insights and help in accurate diagnosis and treatment planning.</li></ul><ul id="e9025b5c-0f7e-473c-9204-691b62880f30" class="bulleted-list"><li style="list-style-type:disc"><strong>Content Management</strong>: Image captioning can be used in content management systems to automatically generate captions for images uploaded by users. This simplifies the process of organizing and searching for images within a large database, making it easier to retrieve specific images based on their content.</li></ul><ul id="827b05bc-27ac-45a6-944f-749c9cd4f579" class="bulleted-list"><li style="list-style-type:disc"><strong>Education</strong>: Image captioning can be utilized in educational settings to provide visual descriptions for educational materials, such as textbooks, presentations, or online courses. This benefits students with visual impairments or those who prefer learning through text-based information.</li></ul><ul id="ec836f0f-a21e-4c34-b325-8a924e2a416a" class="bulleted-list"><li style="list-style-type:disc"><strong>Social Media</strong>: Image captioning can be valuable in the social media industry, where users share a large number of images. Automatically generating captions for these images can improve accessibility, searchability, and engagement on social media platforms.</li></ul><p id="9c9c1c0f-a4fa-44df-be0e-4262e49593ad" class="">These are just a few examples of the many industry applications of image captioning. The technology has the potential to streamline processes, improve accessibility, and enhance user experiences across various domains.</p><h2 id="8b606850-a3d5-412e-aacf-d63994bac596" class="">Follow on Research</h2><p id="3bddfda3-4c6f-444e-9752-8db545d34acc" class=""><strong>2015-2016: Early Improvements and Transformer Introduction</strong></p><ul id="438d30aa-7d30-46ed-9919-0463457b1083" class="bulleted-list"><li style="list-style-type:disc">Researchers began improving upon the LSTM-based models by addressing their limitations in handling long-term dependencies.</li></ul><ul id="598dd2f7-f834-42ae-8f66-ac5264fda06d" class="bulleted-list"><li style="list-style-type:disc">The introduction of transformer architecture by Vaswani et al. in 2017 began to influence image captioning approaches, although widespread adoption in this field would take a couple more years.</li></ul><p id="5f85f109-0947-4617-b7e3-12484a866f6f" class=""><strong>2017-2018: Rise of Transformer Models and Object Relation Focus</strong></p><ul id="89e407f0-1ff0-4c31-94ee-e038a6a0d6c1" class="bulleted-list"><li style="list-style-type:disc">Following the success of transformers in NLP, attention began to shift towards applying these models to image captioning, focusing on the global context within images.</li></ul><ul id="e1949be9-be79-4536-8445-9c8657143e9e" class="bulleted-list"><li style="list-style-type:disc">Studies on object relation models started to gain traction, aiming to capture interactions between objects in an image for richer captions.</li></ul><p id="11c74ecd-0f35-4c83-b96a-2f45b30a752c" class=""><strong>2019: Multi-Modal Pre-trained Transformers</strong></p><ul id="6fddc3dd-f38a-45ef-bf57-38677383b0b0" class="bulleted-list"><li style="list-style-type:disc">OpenAI introduced models like CLIP and later DALL-E, which could learn from both text and images, enabling more advanced captioning and content generation capabilities.</li></ul><p id="6c984fe6-8e9f-40b9-bbfe-e0bc7f30ae81" class=""><strong>2020: Audio-Visual Models and Cross-Lingual Capabilities</strong></p><ul id="884675fb-1a97-4bd2-aaec-612012422c87" class="bulleted-list"><li style="list-style-type:disc">There was an increased emphasis on audio-visual models, integrating sound and image data for comprehensive sensory descriptions.</li></ul><ul id="a519a6ac-e628-42e5-8956-5738906cafc6" class="bulleted-list"><li style="list-style-type:disc">Research on cross-lingual captioning expanded, allowing models to generate captions in various languages and broadening the accessibility of the technology.</li></ul><p id="eb3379ca-96fc-4df4-96a1-1be61b4f5a27" class=""><strong>2021: Dataset Diversification and Bias Mitigation</strong></p><ul id="17c2c3e2-6eb8-4dad-bb5e-dfd213acf3c2" class="bulleted-list"><li style="list-style-type:disc">The AI community focused on curating more diverse datasets to reduce bias in image captioning models.</li></ul><ul id="a658bf58-7117-4770-b6a2-6e8f1c6977db" class="bulleted-list"><li style="list-style-type:disc">Concurrently, algorithms began to be developed for detecting and correcting biases in generated captions.</li></ul><p id="c73e22a7-cc06-48c5-b317-e688a5582369" class=""><strong>2022: Interpretability and Real-time Captioning</strong></p><ul id="a8f411a0-213d-4768-af8f-41d94b2bc6f2" class="bulleted-list"><li style="list-style-type:disc">The push for interpretability in AI saw the development of models that could provide insight into their captioning decisions.</li></ul><ul id="0511e6c4-9dd3-4a33-b082-f8a63079381a" class="bulleted-list"><li style="list-style-type:disc">Advances in real-time captioning and edge computing emerged, aiming to make image captioning more efficient and applicable in low-resource environments.</li></ul><p id="9a0cac6b-be10-4c24-99be-f4afea598be9" class=""><strong>2023 and Beyond: Ongoing and Future Directions</strong></p><ul id="182f8d76-6824-4a52-8604-296a4d70502c" class="bulleted-list"><li style="list-style-type:disc">The ethical use of image captioning technology, especially concerning privacy and surveillance, continues to be a critical area of discussion.</li></ul><ul id="11998a3e-38fe-422a-8adf-faaff1e6f02a" class="bulleted-list"><li style="list-style-type:disc">Domain-specific applications, particularly in healthcare, are seeing tailored image captioning models that assist in diagnostic processes.</li></ul><h2 id="55140a99-8151-4ba0-aba6-f4e16fc5dcdb" class="">Peer Review</h2><p id="2e0a3557-1fba-4aff-a253-078c479f394b" class=""><strong>Summary:</strong></p><p id="f8df9116-70f2-4c32-9781-a8a2f53f71bf" class="">The paper introduces two innovative attention-based image captioning models: a &quot;soft&quot; deterministic approach and a &quot;hard&quot; stochastic variant. Distinctively, it diverges from prior methods by leveraging an attention mechanism to selectively focus on relevant image segments during caption generation, instead of compressing the entire image into a single vector. This nuanced approach has led to exceptional performance across standard datasets like Flickr8k, Flickr30k, and MS COCO, marking a significant stride in the field.</p><p id="be9506fb-c573-4f55-b9c8-b070730eba45" class=""><strong>Strengths and Weaknesses</strong></p><ul id="c3ad84e9-aa0d-4c68-9cf6-3e000f88ac1e" class="bulleted-list"><li style="list-style-type:disc"><strong>Originality</strong>:<ul id="d3158fed-4d64-43d9-9f69-ae49ecd806fc" class="bulleted-list"><li style="list-style-type:circle">The paper&#x27;s introduction of visual attention in caption generation is a pioneering approach. Its integration with encoder-decoder RNNs demonstrates ingenuity and a deep understanding of the field&#x27;s needs.</li></ul><ul id="02004875-edbc-4706-a132-00005c55c245" class="bulleted-list"><li style="list-style-type:circle">The literature review comprehensively acknowledges related works, ensuring the model&#x27;s novelty is contextualized within the existing body of research.</li></ul></li></ul><ul id="0c0cbb54-7d34-440b-bd54-990738e7d29d" class="bulleted-list"><li style="list-style-type:disc"><strong>Quality</strong>:<ul id="289bcc90-4e9e-4b14-8730-821c3e8735c3" class="bulleted-list"><li style="list-style-type:circle">Methodologically, the paper stands on a solid foundation, with its experimental design adhering to rigorous standards. The models are evaluated against well-established benchmarks, showcasing their superiority in performance.</li></ul><ul id="b4ee7045-fb3f-42c0-af25-04d76642b026" class="bulleted-list"><li style="list-style-type:circle">The depth of evaluation, covering multiple datasets, reinforces the robustness of the proposed methods.</li></ul></li></ul><ul id="1a293e24-27b5-465b-bba3-44db4c87c890" class="bulleted-list"><li style="list-style-type:disc"><strong>Clarity</strong>:<ul id="1b509dc0-d674-4c78-864a-e22115ca920f" class="bulleted-list"><li style="list-style-type:circle">The paper excels in presenting complex ideas with clarity. The attention mechanism and its integration into the model are elucidated with precision, making the paper accessible to both experts and those new to the field.</li></ul><ul id="e4e791ed-7f37-4ffb-b4af-2340f3aa3e78" class="bulleted-list"><li style="list-style-type:circle">The use of visual aids in explaining the model’s workings significantly enhances the reader&#x27;s understanding.</li></ul></li></ul><ul id="07d50d18-a07d-41bb-ad1e-db089a55a040" class="bulleted-list"><li style="list-style-type:disc"><strong>Significance</strong>:<ul id="6e06f628-f4fa-450c-9499-7c2be0c0fa08" class="bulleted-list"><li style="list-style-type:circle">This work represents a significant leap in the field of image captioning, especially in terms of interpretability and alignment with human perception.</li></ul><ul id="38f7374d-8fa5-407f-9766-d48ac351a11f" class="bulleted-list"><li style="list-style-type:circle">The practical implications of this research are vast, potentially impacting numerous applications from assistive technologies to content creation.</li></ul></li></ul><ul id="b74bc037-8379-4b22-b963-01bdb53e23a8" class="bulleted-list"><li style="list-style-type:disc"><strong>Weaknesses</strong>:<ul id="a047e515-4d96-443c-b29a-70e5e3252e86" class="bulleted-list"><li style="list-style-type:circle">The paper, while technically sound, lacks a discussion on the societal implications of the technology, especially regarding privacy and ethical use.</li></ul><ul id="1b1f944e-0c38-43e4-abf2-877b16e10fd3" class="bulleted-list"><li style="list-style-type:circle">There is also a missed opportunity in not exploring the limitations or potential biases inherent in the training data, which could impact the model&#x27;s performance in real-world scenarios.</li></ul></li></ul><p id="0026c07d-2a89-40e0-b7e5-950d4b597e20" class=""><strong>Confidence Score: 8 - Strong Accept</strong></p><ul id="da9f14a3-4026-42de-8d4b-84d41f5be6f9" class="bulleted-list"><li style="list-style-type:disc">The paper&#x27;s technical proficiency is evident in the attention mechanism it introduces, setting it apart from previous state-of-the-art methods.</li></ul><ul id="dee9bb99-264c-46f3-abe4-19cbcc590c94" class="bulleted-list"><li style="list-style-type:disc">The thoroughness in evaluation, demonstrated across multiple datasets, underscores the model&#x27;s effectiveness and reliability.</li></ul><ul id="e043b8b4-8173-46ec-8db5-70d80bb7242d" class="bulleted-list"><li style="list-style-type:disc">The clarity and structure of the paper, combined with insightful visualizations, contribute significantly to its academic merit.</li></ul><ul id="7c7cd18d-46fc-42d8-a3eb-87f079538a5c" class="bulleted-list"><li style="list-style-type:disc">Despite the lack of discussion on broader societal impacts, the paper&#x27;s technical contributions and the potential for practical application make it a valuable addition to the field.</li></ul><p id="05adc013-ff74-4b93-aa6e-2d62b836414a" class="">In conclusion, the paper is a noteworthy contribution to image captioning, offering innovative approaches and setting new performance benchmarks. Its strengths in originality, quality, clarity, and significance make it a strong candidate for acceptance, with the potential to influence future research and applications in the field.</p><h1 id="339844da-c2ae-43dd-93a9-6cf6c44edf14" class="">References</h1><p id="55e084ce-4573-4ec8-90ff-a0e14095a6d2" class="">[Cho et.al., 2014] Cho, Kyunghyun, van Merrienboer, Bart, Gulcehre, Caglar, Bougares, Fethi, Schwenk, Holger, and Bengio, Yoshua. <em>Learning phrase representations using RNN encoder-decoder for statistical machine translation</em> In EMNLP, October 2014.</p><p id="f9effc92-ff8b-42b5-8682-7097fb7d514e" class="">[Bahdanau et al., 2014] Bahdanau, Dzmitry, Cho, Kyunghyun, and Bengio, Yoshua. <em>Neural machine translation by jointly learning to align and translate</em> CoRR 2014.</p><p id="b635ac49-e9e9-4af6-a3b6-d7075231f7cc" class="">[Sutskever et al., 2014 ] Sutskever, Ilya, Vinyals, Oriol, and Le, Quoc VV. <em>Sequence to sequence learning with neural networks.</em> NIPS2014.</p><p id="53aaa8a4-063a-426c-bbec-a0e76bd87cf6" class="">[Donahue et al. 2014 ] Donahue, Jeff, Hendrikcs, Lisa Anne, Guadarrama, Segio,Rohrbach, Marcus, Venugopalan, Subhashini, Saenko, Kate, and Darrell, Trevor. <em>Long-term recurrent convolutional networks for visual recognition and description.</em> arXiv:1411.4389v2, November 2014.</p><p id="682ed8f4-8cd2-49e6-8561-0d9ea0bf6a3b" class="">[Kiros et al. 2014a ] Kiros, Ryan, Salahutdinov, Ruslan, and Zemel, Richard. <em>Multimodal neural language models.</em> In International Conference on Machine Learning, pp. 595–603, 2014a.</p><p id="b0416923-93d7-49a1-a61d-9f476a0d04c7" class="">[Kiros et al. 2014b ] Kiros, Ryan, Salahutdinov, Ruslan, and Zemel, Richard. <em>Unifying visual-semantic embeddings with multimodal neural language models.</em> arXiv:1411.2539, November 2014b.</p><p id="1c7246d8-de65-480f-86eb-a74ba8338096" class="">[Mao et al. 2014 ] Mao, Junhua, Xu, Wei, Yang, Yi, Wang, Jiang, and Yuille, Alan. <em>Deep captioning with multimodal recurrent neural networks (m-run)</em><a href="https://arxiv.org/abs/1412.6632"><em>.</em></a> arXiv:1412.6632, December 2014.</p><p id="d8c75921-e05b-49a9-bdf8-1b9c6ee78368" class="">[Vinyals et al. 2014 ] Vinyals, Oriol, Toshev, Alexander, Bengio, Samy, and Erhan, Dumitru. <em>Show and tell: A neural image caption generator</em><a href="https://arxiv.org/abs/1411.4555"><em>.</em></a> arXiv:1411.4555, November 2014.</p><p id="0de5afaf-089d-4674-bd51-cab27965e8fb" class="">[Karpathy &amp; Li 2014] Karpathy, Andrej and Li, Fei-Fei. <em>Deep visual-semantic alignments for generating image descriptions.</em> arXiv:1412.2306, December 2014.</p><p id="8010d1c7-759b-49a1-878c-c1aded26cb99" class="">[Fang et al. (2014)] Fang, Hao, Gupta, Saurabh, Iandola, Forrest, Srivastava, Rupesh, Deng, Li, Doll´ar, Piotr, Gao, Jianfeng, He, Xiaodong, Mitchell, Margaret, Platt, John, et al <em>From captions to visual concepts and back.</em> arXiv:1411.4952, November 2014.</p><p id="b99d21be-9f8a-44f1-b3b8-afe8a241af4b" class="">[Larochelle &amp; Hinton (2010)] Larochelle, Hugo and Hinton, Geoffrey E. <em>Learning to combine foveal glimpses with a third-order Boltzmann machine.</em> In NIPS, pp. 1243–1251, 2010.</p><p id="f058fdd3-cfcc-46d1-b4cc-e85a15187cd4" class="">[ Denil et al. (2012)] Denil, Misha, Bazzani, Loris, Larochelle, Hugo, and de Freitas, Nando. <em>Learning where to attend with deep architectures for image tracking</em><a href="https://arxiv.org/abs/1109.3737"><em>.</em></a> Neural Computation, 2012.</p><p id="6a80ae01-8b17-479c-83aa-2da2280852bc" class="">[Tang et al. (2014)] Tang, Yichuan, Srivastava, Nitish, and Salakhutdinov, Ruslan R. <em>Learning generative models with visual attention.</em> In NIPS, pp.1808–1816, 2014.</p><p id="c634d568-37b7-4251-880a-e889e9bcbd0e" class="">[Mnih et al. (2014)] Mnih, Volodymyr, Hees, Nicolas, Graves, Alex, and Kavukcuoglu, Koray. <em>Recurrent models of visual attention</em><a href="https://arxiv.org/abs/1406.6247"><em>.</em></a> In NIPS, 2014.</p><p id="86d56e7e-3c73-4da3-b9c8-537351b21262" class="">[Ba et al. (2014)] Ba, Jimmy Lei, Mnih, Volodymyr, and Kavukcuoglu, Koray. <em>Multiple object recognition with visual attention.</em> arXiv:1412.7755, December 2014.</p><p id="866dc824-af07-4d7d-bc20-2ff6dc4b83c2" class="">
+</p></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
